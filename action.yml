@@ -1,0 +1,41 @@
+name: 'Ownship Deploy'
+description: 'Deploy a project on your own hardware through Ownship'
+branding:
+  icon: 'anchor'
+  color: 'purple'
+
+inputs:
+  token:
+    description: 'Ownship API token (use a deploy-scope token; store it as a repository secret)'
+    required: true
+  project-id:
+    description: 'The Ownship project id to deploy'
+    required: true
+  api-url:
+    description: 'Ownship API base URL'
+    required: false
+    default: 'https://api.ownship.dev'
+  wait:
+    description: 'Wait for the deployment to finish and fail the job if it fails'
+    required: false
+    default: 'true'
+
+outputs:
+  deployment-id:
+    description: 'The id of the created deployment'
+    value: ${{ steps.deploy.outputs.deployment-id }}
+  url:
+    description: 'The public URL of the deployment (when wait is true and routing is configured)'
+    value: ${{ steps.deploy.outputs.url }}
+
+runs:
+  using: 'composite'
+  steps:
+    - id: deploy
+      shell: bash
+      env:
+        OWNSHIP_TOKEN: ${{ inputs.token }}
+        OWNSHIP_PROJECT_ID: ${{ inputs.project-id }}
+        OWNSHIP_API_URL: ${{ inputs.api-url }}
+        OWNSHIP_WAIT: ${{ inputs.wait }}
+      run: ${{ github.action_path }}/deploy.sh
